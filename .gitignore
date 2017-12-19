@@ -1,0 +1,3 @@
+/.vagrant
+/data/web/src/*
+!/data/web/src/.gitkeep

@@ -1,0 +1,50 @@
+---
+- name: Nginx 追加 (PPA リポジトリ追加、apt-get update)
+  apt_repository: repo='ppa:nginx/stable' state=present
+  register: ppastable
+
+- name: Nginx をインストール
+  apt: pkg=nginx state=latest update_cache=true
+  when: ppastable|success
+  register: nginxinstalled
+  notify:
+   - Start Nginx
+
+- name: H5BP の設定を利用、Config 追加
+  copy: src=h5bp dest=/etc/nginx owner=root group=root
+
+- name: Default Config を無効にする 
+  file: dest=/etc/nginx/sites-enabled/default state=absent
+  notify:
+    - Reload Nginx
+
+- name: Nginx Config を置き換え
+  copy: dest=/etc/nginx/nginx.conf src=templates/nginx.conf owner=root group=root mode=644 backup=yes
+  notify:
+    - Reload Nginx
+
+- name: サイト用 Config を追加
+  when: nginxinstalled|success
+  template: src={{ domain }}.j2 dest=/etc/nginx/sites-available/{{ domain }} owner=root group=root
+
+- name: サイト用 Config を有効にする
+  file: src=/etc/nginx/sites-available/{{ domain }} dest=/etc/nginx/sites-enabled/{{ domain }} state=link
+  notify:
+    - Reload Nginx
+
+- name: サイト用ディレクトリ作成
+  file: path=/var/www/{{ domain }} state=directory mode=775 owner=www-data group=www-data recurse=yes
+
+- name: Unzip インストール
+  apt: pkg=unzip state=latest update_cache=true
+
+- name: SSL証明書用のディレクトリ作成
+  file: path=/etc/letsencrypt/live/{{ domain }}/ state=directory owner=root group=root mode=0755
+
+- name: SSL用 fullchain.pem を追加（サーバ証明書と中間証明書を合わせたファイル）
+  when: nginxinstalled|success
+  template: src=fullchain.pem.j2 dest=/etc/letsencrypt/live/{{ domain }}/fullchain.pem owner=root group=root
+
+- name: SSL用 privkey.pem を追加（秘密鍵）
+  when: nginxinstalled|success
+  template: src=privkey.pem.j2 dest=/etc/letsencrypt/live/{{ domain }}/privkey.pem owner=root group=root

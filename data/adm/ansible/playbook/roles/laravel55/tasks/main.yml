@@ -1,0 +1,10 @@
+---
+- name: Set laravel5.5
+  command: >
+    composer global require "laravel/installer"
+    PATH=$PATH:$HOME/.config/composer/vendor/bin
+    cd /vagrant_data/
+    laravel new project_name
+    sudo chgrp -R www-data storage bootstrap/cache
+    sudo chmod -R ug+rwx storage bootstrap/cache
+  when: not composer_bin.stat.exists

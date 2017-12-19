@@ -1,0 +1,4 @@
+---
+- name: タイムゾーンの設定
+  timezone:
+    name: "{{ ubuntu_timezone }}"

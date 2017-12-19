@@ -1,0 +1,13 @@
+---
+ - hosts: 192.168.33.11
+   become: yes
+   user: vagrant
+   roles:
+    - ubuntu
+    - nginx
+    - itcraftsmanpl.php7
+    - geerlingguy.memcached
+    - geerlingguy.git
+    - geerlingguy.composer
+    - tersmitten.htop
+    - geerlingguy.mysql
