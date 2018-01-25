@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
     web.vm.provider "virtualbox" do |vb|
       vb.memory = "1024"
     end
-    web.vm.synced_folder "./data/web/src", "/var/www/localhostcom", :mount_options => ['dmode=777', 'fmode=777']
+    web.vm.synced_folder "./data/web/src", "/var/www/local.localhostcom", :mount_options => ['dmode=777', 'fmode=777']
   end
 
   # 管理サーバ/プロビジョニング
